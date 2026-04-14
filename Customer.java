@@ -101,10 +101,16 @@ class Movie {
 class Rental {
     private Movie movie;
     private int   daysRented;
+    private boolean oneDollarOffIfOverFiveCoupon;
 
     public Rental(Movie movie, int daysRented) {
-        this.movie      = movie;
+        this(movie, daysRented, false);
+    }
+
+    public Rental(Movie movie, int daysRented, boolean oneDollarOffIfOverFiveCoupon) {
+        this.movie = movie;
         this.daysRented = daysRented;
+        this.oneDollarOffIfOverFiveCoupon = oneDollarOffIfOverFiveCoupon;
     }
 
     public int getDaysRented() {
@@ -116,7 +122,11 @@ class Rental {
     }
 
     public double getCharge() {
-        return movie.getCharge(daysRented);
+        double charge = movie.getCharge(daysRented);
+        if (oneDollarOffIfOverFiveCoupon) {
+            charge = RentalCoupon.applyOneDollarOffIfOverFive(charge);
+        }
+        return charge;
     }
 
     public int getFrequentRenterPoints() {
