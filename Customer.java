@@ -82,7 +82,6 @@ class Rental {
     public int getFrequentRenterPoints() { return movie.getFrequentRenterPoints(daysRented); }
 }
 
-// Decorator base class - wraps a Rental and lets us modify getCharge()
 abstract class RentalCoupon extends Rental {
     protected Rental rental;
 
@@ -100,7 +99,6 @@ abstract class RentalCoupon extends Rental {
     }
 }
 
-// 50% off coupon - just cuts the charge in half
 class HalfOffCoupon extends RentalCoupon {
     public HalfOffCoupon(Rental rental) {
         super(rental);
@@ -112,20 +110,33 @@ class HalfOffCoupon extends RentalCoupon {
     }
 }
 
-class FreeMovie extends RentalCoupon{        //Coupon for a free movie
-    public FreeMovie(Rental rental){
+class FreeMovie extends RentalCoupon {
+    public FreeMovie(Rental rental) {
         super(rental);
     }
 
     @Override
-        public double getCharge(){        //Chrage returns 0 because movie is free
-            return 0;
-        }
+    public double getCharge() {
+        return 0;
+    }
+}
+
+// Part b
+// Coupon that takes off 5$ off for a transaction of 5 or more rentals, same as 50%, just subtracts 5
+class FiveDollarsOff extends RentalCoupon {
+    public FiveDollarsOff(Rental rental) {
+        super(rental);
+    }
+
+    @Override
+    public double getCharge() {
+        return rental.getCharge() - 5;
+    }
 }
 
 public class Customer {
     private String name;
-    private Int customerPoints;        //Keeps track of how many points a customer has
+    private int customerPoints;
     private List<Rental> rentals = new ArrayList<>();
 
     public Customer(String name) {
@@ -133,12 +144,12 @@ public class Customer {
     }
 
     public void addRental(Rental rental) {
-        if(customerPoints >= 10){                //If the customer has 10 or more points they get a free movie
+        if (customerPoints >= 10) {
             rental = new FreeMovie(rental);
-            customerPoints = customerPoints - 10;        //Subtracts 10 points from the customer total points
+            customerPoints = customerPoints - 10;
         }
         rentals.add(rental);
-        customerPoints = customerPoints + rental.getFrequentRenterPoints();        //adds points to a customer when they rent a movie
+        customerPoints = customerPoints + rental.getFrequentRenterPoints();
     }
 
     public String getName() {
@@ -154,6 +165,12 @@ public class Customer {
             frequentRenterPoints += r.getFrequentRenterPoints();
             result += "\t" + r.getMovie().getTitle() + "\t" + r.getCharge() + "\n";
             totalAmount += r.getCharge();
+        }
+
+        // B
+        if (rentals.size() >= 5) {
+            totalAmount -= 5;
+            result += "Transaction discount applied: -$5.00\n";
         }
 
         result += "Amount owed is " + totalAmount + "\n";
@@ -177,6 +194,13 @@ public class Customer {
             total += r.getCharge();
             points += r.getFrequentRenterPoints();
         }
+
+        // B
+        if (rentals.size() >= 5) {
+            total -= 5;
+            xml.append("  <transactionDiscount>-5.00</transactionDiscount>\n");
+        }
+
         xml.append("  <totalAmount>").append(total).append("</totalAmount>\n");
         xml.append("  <frequentRenterPoints>").append(points).append("</frequentRenterPoints>\n");
         xml.append("</statement>");
@@ -190,7 +214,7 @@ public class Customer {
 
         Customer customer = new Customer("John Smith");
         customer.addRental(new Rental(regular, 3));
-        customer.addRental(new HalfOffCoupon(new Rental(newRelease, 2))); // 50% off
+        customer.addRental(new HalfOffCoupon(new Rental(newRelease, 2)));
         customer.addRental(new Rental(childrens, 4));
 
         System.out.println(customer.statement());
