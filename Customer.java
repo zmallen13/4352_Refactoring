@@ -176,10 +176,22 @@ class HalfOffCoupon extends RentalCoupon {
     }
 }
 
+class FreeMovie extends RentalCoupon {
+    public FreeMovie(Rental rental) {
+        super(rental);
+    }
+
+    @Override
+        public double getCharge() {
+            return 0;
+        }
+}
+
 // ==================== Customer ====================
 public class Customer {
     private String       name;
     private List<Rental> rentals;
+    private int customerPoints;
 
     public Customer(String name) {
         this.name    = name;
@@ -187,7 +199,12 @@ public class Customer {
     }
 
     public void addRental(Rental rental) {
+        if(customerPoints >= 10) {
+            rental = new FreeMovie(rental);
+            customerPoints = customerPoints - 10;
+        }
         rentals.add(rental);
+        customerPoints = customerPoints + rental.getFrequentRenterPoints(); 
     }
 
     public String getName() {
