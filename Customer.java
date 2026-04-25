@@ -1,6 +1,18 @@
 import java.util.ArrayList;
 import java.util.List;
 
+final class RentalCoupon {
+    private RentalCoupon() {
+    }
+
+    public static double applyOneDollarOffIfOverFive(double chargeBeforeCoupon) {
+        if (chargeBeforeCoupon > 5.0) {
+            return chargeBeforeCoupon - 1.0;
+        }
+        return chargeBeforeCoupon;
+    }
+}
+
 // ==================== Price (abstract) ====================
 abstract class Price {
     public abstract int getPriceCode();
