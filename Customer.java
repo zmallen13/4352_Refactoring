@@ -204,10 +204,6 @@ public class Customer {
         return xml.toString();
     }
 
-    public String statementXml() {
-        return xmlStatement();
-    }
-
     public static void main(String[] args) {
         Customer customer = new Customer("John Smith");
         customer.addRental(new Rental(new Movie("Independence Day",  Movie.REGULAR),     3));
