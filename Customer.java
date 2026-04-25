@@ -182,9 +182,22 @@ class FreeMovie extends RentalCoupon {
     }
 
     @Override
-        public double getCharge() {
-            return 0;
-        }
+    public double getCharge() {
+        return 0;
+    }
+}
+
+// Part b
+// Coupon that takes off 5$ off for a transaction of 5 or more rentals, same as 50%, just subtracts 5
+class FiveDollarsOff extends RentalCoupon {
+    public FiveDollarsOff(Rental rental) {
+        super(rental);
+    }
+
+    @Override
+    public double getCharge() {
+        return rental.getCharge() - 5;
+    }
 }
 
 // ==================== Customer ====================
