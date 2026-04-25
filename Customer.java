@@ -69,17 +69,11 @@ class Movie {
 
 class Rental {
     private Movie movie;
-    private int   daysRented;
-    private boolean oneDollarOffIfOverFiveCoupon;
+    private int daysRented;
 
     public Rental(Movie movie, int daysRented) {
-        this(movie, daysRented, false);
-    }
-
-    public Rental(Movie movie, int daysRented, boolean oneDollarOffIfOverFiveCoupon) {
         this.movie = movie;
         this.daysRented = daysRented;
-        this.oneDollarOffIfOverFiveCoupon = oneDollarOffIfOverFiveCoupon;
     }
 
     public int getDaysRented() { return daysRented; }
@@ -112,10 +106,6 @@ class HalfOffCoupon extends RentalCoupon {
 
     @Override
     public double getCharge() {
-      double charge = movie.getCharge(daysRented);
-        if (oneDollarOffIfOverFiveCoupon) {
-            charge = RentalCoupon.applyOneDollarOffIfOverFive(charge);
-        }
         return rental.getCharge() * 0.5;
     }
 }
@@ -215,10 +205,6 @@ public class Customer {
         xml.append("  <frequentRenterPoints>").append(points).append("</frequentRenterPoints>\n");
         xml.append("</statement>");
         return xml.toString();
-    }
-
-    public String statementXml() {
-        return xmlStatement();
     }
 
     public static void main(String[] args) {
