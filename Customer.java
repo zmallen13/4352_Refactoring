@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 
-final class RentalCoupon {
-    private RentalCoupon() {
+final class RentalDiscountUtil {
+    private RentalDiscountUtil() {
     }
 
     public static double applyOneDollarOffIfOverFive(double chargeBeforeCoupon) {
@@ -136,13 +136,43 @@ class Rental {
     public double getCharge() {
         double charge = movie.getCharge(daysRented);
         if (oneDollarOffIfOverFiveCoupon) {
-            charge = RentalCoupon.applyOneDollarOffIfOverFive(charge);
+            charge = RentalDiscountUtil.applyOneDollarOffIfOverFive(charge);
         }
         return charge;
     }
 
     public int getFrequentRenterPoints() {
         return movie.getFrequentRenterPoints(daysRented);
+    }
+}
+
+// Decorator base class - wraps a Rental and lets us modify getCharge()
+abstract class RentalCoupon extends Rental {
+    protected Rental rental;
+
+    public RentalCoupon(Rental rental) {
+        super(rental.getMovie(), rental.getDaysRented());
+        this.rental = rental;
+    }
+
+    @Override
+    public abstract double getCharge();
+
+    @Override
+    public int getFrequentRenterPoints() {
+        return rental.getFrequentRenterPoints();
+    }
+}
+
+// 50% off coupon - just cuts the charge in half
+class HalfOffCoupon extends RentalCoupon {
+    public HalfOffCoupon(Rental rental) {
+        super(rental);
+    }
+
+    @Override
+    public double getCharge() {
+        return rental.getCharge() * 0.5;
     }
 }
 
