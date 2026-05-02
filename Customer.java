@@ -134,6 +134,26 @@ class FiveDollarsOff extends RentalCoupon {
     }
 }
 
+class BonusPoints extends RentalCoupon{        //Coupon to give 10 points on a rental of 10 or more
+    public BonusPoints(Rental rental){
+        super(rental);
+    }
+
+    @Override
+        public double getCharge(){
+            return rental.getCharge();            //returns original charge
+        }
+
+    @Override
+        public int getFrequentRenterPoints(){
+            int basePoints = rental.getFrequentRenterPoints();    //gets points from the rental
+            if(rental.getCharge() >= 10){                    //If the charge is $10 or more then it adds 10 points
+                return basePoints + 10;
+            }
+            return basePoints;                               //Gives normal amount of points if charge is less than $10
+        }
+}
+
 public class Customer {
     private String name;
     private int customerPoints;
@@ -144,6 +164,8 @@ public class Customer {
     }
 
     public void addRental(Rental rental) {
+        rental = new BonusPoints(rental);            //Applies the bonus points
+        
         if (customerPoints >= 10) {
             rental = new FreeMovie(rental);
             customerPoints = customerPoints - 10;
