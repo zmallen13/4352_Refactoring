@@ -13,14 +13,10 @@ final class RentalDiscountUtil {
     }
 }
 
-// ==================== Price (abstract) ====================
+// ==================== Price (abstract) — charge only ====================
 abstract class Price {
     public abstract int getPriceCode();
     public abstract double getCharge(int daysRented);
-
-    public int getFrequentRenterPoints(int daysRented) {
-        return 1;
-    }
 }
 
 // ==================== RegularPrice ====================
@@ -47,11 +43,6 @@ class NewReleasePrice extends Price {
     public double getCharge(int daysRented) {
         return daysRented * 3;
     }
-
-    @Override
-    public int getFrequentRenterPoints(int daysRented) {
-        return (daysRented > 1) ? 2 : 1;
-    }
 }
 
 // ==================== ChildrensPrice ====================
@@ -69,6 +60,32 @@ class ChildrensPrice extends Price {
     }
 }
 
+// ==================== Frequent renter points (Strategy) ====================
+abstract class FrequentRenterPointsStrategy {
+    abstract int getPoints(int daysRented);
+}
+
+class RegularFrequentRenterPoints extends FrequentRenterPointsStrategy {
+    @Override
+    int getPoints(int daysRented) {
+        return 1;
+    }
+}
+
+class ChildrensFrequentRenterPoints extends FrequentRenterPointsStrategy {
+    @Override
+    int getPoints(int daysRented) {
+        return 1;
+    }
+}
+
+class NewReleaseFrequentRenterPoints extends FrequentRenterPointsStrategy {
+    @Override
+    int getPoints(int daysRented) {
+        return (daysRented > 1) ? 2 : 1;
+    }
+}
+
 // ==================== Movie ====================
 class Movie {
     public static final int CHILDRENS   = 2;
@@ -76,7 +93,8 @@ class Movie {
     public static final int NEW_RELEASE = 1;
 
     private String title;
-    private Price  price;
+    private Price price;
+    private FrequentRenterPointsStrategy frequentRenterPointsStrategy;
 
     public Movie(String title, int priceCode) {
         this.title = title;
@@ -89,9 +107,18 @@ class Movie {
 
     public void setPriceCode(int arg) {
         switch (arg) {
-            case REGULAR:     this.price = new RegularPrice();     break;
-            case NEW_RELEASE: this.price = new NewReleasePrice();  break;
-            case CHILDRENS:   this.price = new ChildrensPrice();   break;
+            case REGULAR:
+                this.price = new RegularPrice();
+                this.frequentRenterPointsStrategy = new RegularFrequentRenterPoints();
+                break;
+            case NEW_RELEASE:
+                this.price = new NewReleasePrice();
+                this.frequentRenterPointsStrategy = new NewReleaseFrequentRenterPoints();
+                break;
+            case CHILDRENS:
+                this.price = new ChildrensPrice();
+                this.frequentRenterPointsStrategy = new ChildrensFrequentRenterPoints();
+                break;
             default: throw new IllegalArgumentException("Incorrect price code");
         }
     }
@@ -105,7 +132,7 @@ class Movie {
     }
 
     public int getFrequentRenterPoints(int daysRented) {
-        return price.getFrequentRenterPoints(daysRented);
+        return frequentRenterPointsStrategy.getPoints(daysRented);
     }
 }
 
@@ -200,6 +227,26 @@ class FiveDollarsOff extends RentalCoupon {
     }
 }
 
+class BonusPoints extends RentalCoupon {        //Coupon to give 10 points on a rental of 10 or more
+    public BonusPoints(Rental rental) {
+        super(rental);
+    }
+
+    @Override
+        public double getCharge() {
+            return rental.getCharge();            //returns original charge
+        }
+
+    @Override
+        public int getFrequentRenterPoints() {
+            int basePoints = rental.getFrequentRenterPoints();    //gets points from the rental
+            if(rental.getCharge() >= 10){                    //If the charge is $10 or more then it adds 10 points
+                return basePoints + 10;
+            }
+            return basePoints;                               //Gives normal amount of points if charge is less than $10
+        }
+}
+
 // ==================== Customer ====================
 public class Customer {
     private String       name;
@@ -212,6 +259,7 @@ public class Customer {
     }
 
     public void addRental(Rental rental) {
+        rental = new BonusPoints(rental);  
         if(customerPoints >= 10) {
             rental = new FreeMovie(rental);
             customerPoints = customerPoints - 10;
